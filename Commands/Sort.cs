@@ -1,71 +1,16 @@
 ﻿using CommandLine;
-using Sisyphus.Core;
-using System;
+using Sisyphus.Commands.Base;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Xml.Linq;
 
 namespace Sisyphus.Commands
 {
     [Verb("sort", HelpText = "Sort the contents of the provided project file.")]
-    class Sort : BaseCommand
+    class Sort : ProjectFileCommand
     {
-        [Option('i', "input", HelpText = "Input files to be processed.")]
-        public IEnumerable<string> Input { get; set; }
-
-        [Option('r', "recursive", HelpText = "Search recursively.")]
-        public bool IsRecursive { get; set; }
-
-        public override (bool isSuccess, SError error) Run()
+        protected override bool ActOnProject(ref XElement[] itemGroups)
         {
-            Vlog("Will sort!");
-            Console.WriteLine("Hello World!");
-
-            var input = Input ?? new List<string>();
-
-            bool noInputs = input.Count() == 0;
-            if (noInputs)
-            {
-                Vlog("No project files specified.");
-            }
-
-            if (noInputs || input.Count() == 1 && IsRecursive)
-            {
-                var searchOption = noInputs ? SearchOption.TopDirectoryOnly : SearchOption.AllDirectories;
-
-                var files = Directory.GetFiles(Environment.CurrentDirectory, "*.csproj", searchOption)
-                    .Concat(Directory.GetFiles(Environment.CurrentDirectory, "*.vbproj", searchOption));
-                foreach (var file in files)
-                {
-                    SortProjectItems(file);
-                }
-            }
-            else
-            {
-                if (File.Exists(input.First()))
-                {
-                    SortProjectItems(input.First());
-                }
-                else
-                {
-                    return Error($"File not found: {input.First()}");
-                }
-            }
-
-            return Success;
-        }
-
-        static void SortProjectItems(string filePath)
-        {
-            XDocument document = XDocument.Load(filePath, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
-            XNamespace msBuildNamespace = document.Root.GetDefaultNamespace();
-            XName itemGroupName = XName.Get("ItemGroup", msBuildNamespace.NamespaceName);
-
-            // only consider the top-level item groups, otherwise stuff inside Choose, Targets etc. will be broken
-            var itemGroups = document.Root.Elements(itemGroupName).ToArray();
-
             var processedItemGroups = new List<XElement>();
 
             CombineCompatibleItemGroups(itemGroups, processedItemGroups);
@@ -75,51 +20,10 @@ namespace Sisyphus.Commands
                 SortItemGroup(itemGroup);
             }
 
-            var originalBytes = File.ReadAllBytes(filePath);
-            byte[] newBytes = null;
-
-            using (var memoryStream = new MemoryStream())
-            using (var textWriter = new StreamWriter(memoryStream, Encoding.UTF8))
-            {
-                document.Save(textWriter, SaveOptions.None);
-                newBytes = memoryStream.ToArray();
-            }
-
-            if (!AreEqual(originalBytes, newBytes))
-            {
-                File.WriteAllBytes(filePath, newBytes);
-            }
-        }
-
-        private static bool AreEqual(byte[] left, byte[] right)
-        {
-            if (left == null)
-            {
-                return right == null;
-            }
-
-            if (right == null)
-            {
-                return false;
-            }
-
-            if (left.Length != right.Length)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < left.Length; i++)
-            {
-                if (left[i] != right[i])
-                {
-                    return false;
-                }
-            }
-
             return true;
         }
 
-        private static void CombineCompatibleItemGroups(XElement[] itemGroups, List<XElement> processedItemGroups)
+        private void CombineCompatibleItemGroups(XElement[] itemGroups, List<XElement> processedItemGroups)
         {
             var itemTypeLookup = itemGroups.ToDictionary(i => i, i => GetItemTypesFromItemGroup(i));
             foreach (var itemGroup in itemGroups)
@@ -144,7 +48,7 @@ namespace Sisyphus.Commands
             }
         }
 
-        private static void RemoveItemGroup(XElement itemGroup)
+        private void RemoveItemGroup(XElement itemGroup)
         {
             var leadingTrivia = itemGroup.PreviousNode;
             if (leadingTrivia is XText)
@@ -155,7 +59,7 @@ namespace Sisyphus.Commands
             itemGroup.Remove();
         }
 
-        private static void ReplantAllItems(XElement from, XElement to)
+        private void ReplantAllItems(XElement from, XElement to)
         {
             if (to.LastNode is XText)
             {
@@ -170,7 +74,7 @@ namespace Sisyphus.Commands
             }
         }
 
-        private static XElement FindSuitableItemGroup(
+        private XElement FindSuitableItemGroup(
             List<XElement> existingItemGroups,
             XElement itemGroup,
             Dictionary<XElement, HashSet<string>> itemTypeLookup)
@@ -188,7 +92,7 @@ namespace Sisyphus.Commands
             return null;
         }
 
-        private static bool AreItemGroupsMergeable(XElement left, XElement right)
+        private bool AreItemGroupsMergeable(XElement left, XElement right)
         {
             if (!AttributeMissingOrSame(left, right, "Label"))
             {
@@ -203,7 +107,7 @@ namespace Sisyphus.Commands
             return true;
         }
 
-        private static bool AttributeMissingOrSame(XElement left, XElement right, string attributeName)
+        private bool AttributeMissingOrSame(XElement left, XElement right, string attributeName)
         {
             var leftAttribute = left.Attribute(attributeName);
             var rightAttribute = right.Attribute(attributeName);
@@ -219,7 +123,7 @@ namespace Sisyphus.Commands
             return false;
         }
 
-        private static HashSet<string> GetItemTypesFromItemGroup(XElement itemGroup)
+        private HashSet<string> GetItemTypesFromItemGroup(XElement itemGroup)
         {
             var set = new HashSet<string>();
             foreach (var item in itemGroup.Elements())
@@ -230,7 +134,7 @@ namespace Sisyphus.Commands
             return set;
         }
 
-        private static void SortItemGroup(XElement itemGroup)
+        private void SortItemGroup(XElement itemGroup)
         {
             var original = itemGroup.Elements().ToArray();
             var sorted = original
