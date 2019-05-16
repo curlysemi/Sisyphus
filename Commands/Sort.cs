@@ -1,4 +1,7 @@
-﻿using CommandLine;
+﻿// Copyright 2015 Kirill Osenkov
+// https://github.com/KirillOsenkov/CodeCleanupTools/blob/master/SortProjectItems/SortProjectItems.cs
+
+using CommandLine;
 using Sisyphus.Commands.Base;
 using System.Collections.Generic;
 using System.Linq;

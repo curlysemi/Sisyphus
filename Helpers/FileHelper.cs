@@ -9,10 +9,9 @@ namespace Sisyphus.Helpers
 {
     public static class FileHelper
     {
-        public static HashSet<string> GetFilesFromProjectFile(string projectFilePath)
+        public static HashSet<string> GetFilesFromProjectFile(string projectFilePath, string projectDirectory)
         {
             var files = new HashSet<string>();
-
 
             XDocument document = XDocument.Load(projectFilePath, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
             XNamespace msBuildNamespace = document.Root.GetDefaultNamespace();
@@ -21,9 +20,24 @@ namespace Sisyphus.Helpers
             // only consider the top-level item groups, otherwise stuff inside Choose, Targets etc. will be broken
             var itemGroups = document.Root.Elements(itemGroupName).ToArray();
 
-            //var processedItemGroups = new List<XElement>();
+            var fileNodes = new[] { "None", "Compile", "Content" };
 
-            //throw new NotImplementedException();
+            foreach (XElement itemGroup in itemGroups)
+            {
+                var visited = new HashSet<string>();
+                var original = itemGroup.Elements().ToArray();
+                foreach (var item in original)
+                {
+                    if (fileNodes.Contains(item.Name.LocalName))
+                    {
+                        var includePath = item.Attributes()?.FirstOrDefault(a => a.Name.LocalName == "Include")?.Value;
+                        if (!string.IsNullOrWhiteSpace(includePath))
+                        {
+                            files.Add($"{projectDirectory}/{includePath.Replace("\\", "/")}");
+                        }
+                    }
+                }
+            }
 
             return files;
         }

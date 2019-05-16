@@ -1,8 +1,6 @@
 ﻿using CommandLine;
+using Sisyphus.Core;
 using System;
-using System.Collections.Generic;
-using System.Text;
-using SError = Sisyphus.Core.SError;
 
 namespace Sisyphus.Commands.Base
 {

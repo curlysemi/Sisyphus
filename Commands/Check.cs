@@ -22,7 +22,9 @@ namespace Sisyphus.Commands
             // We'll just list files . . .
             var misc1 = Helpers.FileHelper.GetFilesFromGitForProject(RepoPath, "Misc");
 
-            var projDocs = Helpers.FileHelper.GetFilesFromProjectFile(RepoPath + "\\Misc\\Misc.csproj");
+            var projDocs = Helpers.FileHelper.GetFilesFromProjectFile(RepoPath + "\\Misc\\Misc.csproj", "Misc");
+
+            var filesNotIncludedInProjectFile = misc1.Where(m => !projDocs.Contains(m)).ToList();
 
             //misc1.Contains()
 

@@ -1,4 +1,7 @@
-﻿using CommandLine;
+﻿// Copyright 2016 Kirill Osenkov
+// https://github.com/KirillOsenkov/CodeCleanupTools/blob/master/SortProjectItems/SortProjectItems.cs
+
+using CommandLine;
 using Sisyphus.Commands.Base;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +9,7 @@ using System.Xml.Linq;
 
 namespace Sisyphus.Commands
 {
-    [Verb("dedup", HelpText = "Remove duplicate file-references from project file")]
+    [Verb("dedup", HelpText = "Remove duplicate file-references from project file. Sorting first is recommended.")]
     class Dedup : ProjectFileCommand
     {
         protected override bool ActOnProject(ref XElement[] itemGroups)
