@@ -20,7 +20,7 @@ namespace Sisyphus.Commands.Base
         [Option('r', "recursive", HelpText = "Search recursively.")]
         public bool IsRecursive { get; set; }
 
-        public override (bool isSuccess, SError error) Run()
+        protected override (bool isSuccess, SError error) Run()
         {
             Vlog("Will sort!");
 

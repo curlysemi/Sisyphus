@@ -4,11 +4,57 @@ using System.Text;
 using LibGit2Sharp;
 using System.Linq;
 using System.Xml.Linq;
+using Sisyphus.Core.Enums;
+using System.IO;
 
 namespace Sisyphus.Helpers
 {
     public static class FileHelper
     {
+        public static string GetParentDirectory(string path)
+        {
+            var parentDirectory = Path.GetDirectoryName(path);
+            if (parentDirectory == null)
+            {
+                throw new DirectoryNotFoundException($"No parent directory for '{path}'");
+            }
+
+            return parentDirectory;
+        }
+
+        public static string GetName(string path)
+        {
+            return Path.GetFileName(path);
+        }
+
+        public static FileType? GetFileType(string path)
+        {
+            if (File.Exists(path))
+            {
+                string extension = Path.GetExtension(path);
+                switch (extension)
+                {
+                    case ".sln":
+                        return FileType.SolutionFile;
+                    case ".csproj":
+                    case ".vbproj":
+                    case ".fsproj": // TODO: Determine if F# is actually supported . . .
+                        return FileType.ProjectFile;
+                    default:
+                        return FileType.Unknown;
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public static string NormalizePath(string path)
+        {
+            return path.Replace("\\", "/");
+        }
+
         public static HashSet<string> GetFilesFromProjectFile(string projectFilePath, string projectDirectory)
         {
             var files = new HashSet<string>();
@@ -42,89 +88,9 @@ namespace Sisyphus.Helpers
             return files;
         }
 
-        public static HashSet<string> GetAllFilesFromGit(string repoPath)
-        {
-            var files = new HashSet<string>();
-            using (var repo = new Repository(repoPath))
-            {
-                foreach (IndexEntry e in repo.Index)
-                {
-                    if (e.StageLevel == StageLevel.Staged)
-                    {
-                        files.Add(e.Path);
-                    }
-                }
-            }
+        public static HashSet<string> GetAllFilesFromGit(string repoPath) => GitHelper.GetAllFilesFromGit(repoPath);
 
-            return files;
-        }
-
-        #region Naive GetFilesFromGitForProject
-        /*
-        public static HashSet<string> GetFilesFromGitForProject(string repoPath, string projectDirectoryName)
-        {
-            var files = new HashSet<string>();
-            using (var repo = new Repository(repoPath))
-            {
-                bool found = false;
-
-                foreach (IndexEntry e in repo.Index)
-                {
-                    if (e.StageLevel == StageLevel.Staged)
-                    {
-                        if (e.Path.StartsWith(projectDirectoryName))
-                        {
-                            files.Add(e.Path);
-                            found = true;
-                        }
-                        else if (found)
-                        {
-                            // We don't need to keep iterating, since we're out of the project directory
-                            break;
-                        }
-                    }
-                }
-            }
-
-            return files;
-        }
-        */
-        #endregion
-
-        public static HashSet<string> GetFilesFromGitForProject(string repoPath, string projectDirectoryName)
-        {
-            var files = new HashSet<string>();
-
-            using (var repo = new Repository(repoPath))
-            {
-                void walkTreeAndFindFiles(Tree t)
-                {
-                    foreach (var item in t)
-                    {
-                        switch (item.TargetType)
-                        {
-                            case TreeEntryTargetType.Blob:
-                                files.Add(item.Path);
-                                break;
-                            case TreeEntryTargetType.Tree:
-                                walkTreeAndFindFiles(item.Target as Tree);
-                                break;
-                            default:
-                                throw new NotImplementedException($"The following case was not handled: {item.TargetType.ToString()}");
-                        }
-                    }
-                }
-
-                var relevantTree = repo.Head.Tip.Tree.FirstOrDefault(t => t.Name == projectDirectoryName)?.Target;
-
-                if (relevantTree is Tree projectTree)
-                {
-                    walkTreeAndFindFiles(projectTree);
-                }
-            }
-
-            return files;
-        }
+        public static HashSet<string> GetFilesFromGitForProject(string repoPath, string projectDirectoryName) => GitHelper.GetFilesFromGitForProject(repoPath, projectDirectoryName);
 
         public static HashSet<string> GetFilesOnDisk(string directoryPath)
         {

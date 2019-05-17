@@ -1,32 +1,50 @@
 ﻿using CommandLine;
 using Sisyphus.Commands.Base;
 using Sisyphus.Core;
+using Sisyphus.Helpers;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Sisyphus.Commands
 {
     [Verb("check", HelpText = "Check the provided solution or project file for issues (defaults to whatever is in current directory).")]
-    public class Check : BaseCommand
+    public class Check : ProjectFileOrSolutionFileCommand
     {
-        [Option('i', "input", HelpText = "Input git repository path")]
-        public string RepoPath { get; set; }
+        private int Ordinal { get; set; } = 1;
 
-        public override (bool isSuccess, SError error) Run()
+        protected override (bool isSuccess, SError error) HandleProject(string repoPath, string projectPath)
         {
-            Console.WriteLine("Hello World!");
+            // Project files are case-insensitive . . .
+            // But git is case-sensitive . . .
 
-            // TODO: Actually implement
+            // TODO: setting to warn of duplicates when treating git files in a case-insensitive manner . . .
+            // Because `thing.txt` and `Thing.txt` could theoretically both exist . . .
 
-            // We'll just list files . . .
-            var misc1 = Helpers.FileHelper.GetFilesFromGitForProject(RepoPath, "Misc");
+            var absoluteProjectFileParentDirPath = FileHelper.GetParentDirectory(projectPath);
+            var projectFileParentDirectoryName = FileHelper.GetName(absoluteProjectFileParentDirPath);
+            var relativeProjectFileParentDir = Path.GetRelativePath(repoPath, absoluteProjectFileParentDirPath);
 
-            var projDocs = Helpers.FileHelper.GetFilesFromProjectFile(RepoPath + "\\Misc\\Misc.csproj", "Misc");
+            var filesTrackedByGit = FileHelper.GetFilesFromGitForProject(repoPath, relativeProjectFileParentDir);
+            var filesIncludedInProjectFile = FileHelper.GetFilesFromProjectFile(projectPath, projectFileParentDirectoryName);
 
-            var filesNotIncludedInProjectFile = misc1.Where(m => !projDocs.Contains(m)).ToList();
+            // Filter out project files, because project files do not include themselves . . .
+            var self = FileHelper.NormalizePath(Path.GetRelativePath(repoPath, projectPath));
+            filesTrackedByGit.Remove(self);
 
-            //misc1.Contains()
+            var filesNotIncludedInProjectFile = filesTrackedByGit.Where(m => !filesIncludedInProjectFile.Contains(m, StringComparer.CurrentCultureIgnoreCase)).ToList();
+
+            if (filesNotIncludedInProjectFile?.Any() == true)
+            {
+                Log(projectFileParentDirectoryName + ":");
+                foreach (var file in filesNotIncludedInProjectFile)
+                {
+                    LogError($" ({Ordinal}) \t{file}");
+                    Ordinal++;
+                }
+                Log("\n");
+            }
 
             return Success;
         }
