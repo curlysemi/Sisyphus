@@ -17,12 +17,14 @@ namespace Sisyphus
             return Parser.Default.ParseArguments<
                 Check,
                 Dedup,
-                Sort
+                Sort,
+                MkConf
                 >(args)
             .MapResult(
               (Check cmd) => cmd.Execute(),
               (Dedup cmd) => cmd.Execute(),
               (Sort cmd) => cmd.Execute(),
+              (MkConf cmd) => cmd.Execute(),
               errs => 1);
         }
     }

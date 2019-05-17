@@ -2,14 +2,12 @@
 using Sisyphus.Core;
 using Sisyphus.Core.Enums;
 using Sisyphus.Helpers;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Sisyphus.Commands.Base
 {
-    public abstract class ProjectFileOrSolutionFileCommand : BaseCommand
+    internal abstract class ProjectFileOrSolutionFileCommand : BaseCommand
     {
         [Option('i', "input", HelpText = "Input project file of solution file path")]
         public string ProjectFileOrSolutionFilePath { get; set; }
@@ -17,9 +15,10 @@ namespace Sisyphus.Commands.Base
         protected virtual void BeforeAll(string repoPath, ref List<string> absoluteProjectFilePaths) { }
 
         protected abstract (bool isSuccess, SError error) HandleProject(string repoPath, string projectPath);
+
         protected virtual void AfterAll(string repoPath, ref List<string> absoluteProjectFilePaths) { }
 
-        protected override (bool isSuccess, SError error) Run()
+        protected override (bool isSuccess, SError error) Run(Config config)
         {
             var absoluteProjectFilePaths = new List<string>();
 

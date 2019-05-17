@@ -12,7 +12,7 @@ using System.Xml.Linq;
 
 namespace Sisyphus.Commands.Base
 {
-    public abstract class ProjectFileCommand : BaseCommand
+    internal abstract class ProjectFileCommand : BaseCommand
     {
         [Option('i', "input", HelpText = "Input files to be processed.")]
         public IEnumerable<string> Input { get; set; }
@@ -20,7 +20,7 @@ namespace Sisyphus.Commands.Base
         [Option('r', "recursive", HelpText = "Search recursively.")]
         public bool IsRecursive { get; set; }
 
-        protected override (bool isSuccess, SError error) Run()
+        protected override (bool isSuccess, SError error) Run(Config config)
         {
             Vlog("Will sort!");
 
@@ -95,7 +95,7 @@ namespace Sisyphus.Commands.Base
         }
 
         protected abstract bool ActOnProject(ref XElement[] itemGroups);
-       
+
         private static byte[] SyncBOM(byte[] originalBytes, byte[] newBytes)
         {
             bool originalHasBOM = HasBOM(originalBytes);

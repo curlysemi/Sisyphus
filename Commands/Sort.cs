@@ -10,7 +10,7 @@ using System.Xml.Linq;
 namespace Sisyphus.Commands
 {
     [Verb("sort", HelpText = "Sort the contents of the provided project file.")]
-    class Sort : ProjectFileCommand
+    internal class Sort : ProjectFileCommand
     {
         protected override bool ActOnProject(ref XElement[] itemGroups)
         {

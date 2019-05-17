@@ -10,7 +10,7 @@ using System.Xml.Linq;
 namespace Sisyphus.Commands
 {
     [Verb("dedup", HelpText = "Remove duplicate file-references from project file. Sorting first is recommended.")]
-    class Dedup : ProjectFileCommand
+    internal class Dedup : ProjectFileCommand
     {
         protected override bool ActOnProject(ref XElement[] itemGroups)
         {

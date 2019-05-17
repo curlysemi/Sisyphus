@@ -3,14 +3,13 @@ using Sisyphus.Commands.Base;
 using Sisyphus.Core;
 using Sisyphus.Helpers;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace Sisyphus.Commands
 {
     [Verb("check", HelpText = "Check the provided solution or project file for issues (defaults to whatever is in current directory).")]
-    public class Check : ProjectFileOrSolutionFileCommand
+    internal class Check : ProjectFileOrSolutionFileCommand
     {
         private int Ordinal { get; set; } = 1;
 
