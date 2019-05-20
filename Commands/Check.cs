@@ -20,8 +20,9 @@ namespace Sisyphus.Commands
             // TODO: setting to warn of duplicates when treating git files in a case-insensitive manner . . .
             // Because `thing.txt` and `Thing.txt` could theoretically both exist . . .
 
-            var filesTrackedByGit = FileHelper.GetFilesFromGitForProject(repoPath, projectPath);
-            var filesIncludedInProjectFile = FileHelper.GetFilesFromProjectFile(projectPath, out string projectFileParentDirectoryName);
+            var filesTrackedByGit = GitHelper.GetFilesFromGitForProject(repoPath, projectPath);
+            var filesIncludedInProjectFile = ProjectFileHelper.GetFilesFromProjectFile(projectPath, out string projectFileParentDirectoryName);
+            //ProjectFileHelper.GetNamePathMappingFromProjectFile(projectPath);
 
             // Filter out project files, because project files do not include themselves . . .
             var self = FileHelper.NormalizePath(Path.GetRelativePath(repoPath, projectPath));

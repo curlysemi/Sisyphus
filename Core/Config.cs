@@ -23,7 +23,8 @@ namespace Sisyphus.Core
         {
             config.IgnorableFiles.AddRange(
                 "**.gitignore",
-                "**.tfignore"
+                "**.tfignore",
+                "**.excludes"
             );
         }
 
