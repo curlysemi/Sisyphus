@@ -57,7 +57,7 @@ namespace Sisyphus.Helpers
 
         public static HashSet<string> GetFilesFromProjectFile(string projectPath, out string projectFileParentDirectoryName)
         {
-            var absoluteProjectFileParentDirPath = FileHelper.GetParentDirectory(projectPath);
+            var absoluteProjectFileParentDirPath = GetParentDirectory(projectPath);
             projectFileParentDirectoryName = FileHelper.GetName(absoluteProjectFileParentDirPath);
 
             var files = new HashSet<string>();
