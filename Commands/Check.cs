@@ -15,23 +15,18 @@ namespace Sisyphus.Commands
 
         protected override (bool isSuccess, SError error) HandleProject(string repoPath, string projectPath)
         {
-            // Project files are case-insensitive . . .
-            // But git is case-sensitive . . .
-
             // TODO: setting to warn of duplicates when treating git files in a case-insensitive manner . . .
             // Because `thing.txt` and `Thing.txt` could theoretically both exist . . .
 
-            var absoluteProjectFileParentDirPath = FileHelper.GetParentDirectory(projectPath);
-            var projectFileParentDirectoryName = FileHelper.GetName(absoluteProjectFileParentDirPath);
-            var relativeProjectFileParentDir = Path.GetRelativePath(repoPath, absoluteProjectFileParentDirPath);
-
-            var filesTrackedByGit = FileHelper.GetFilesFromGitForProject(repoPath, relativeProjectFileParentDir);
-            var filesIncludedInProjectFile = FileHelper.GetFilesFromProjectFile(projectPath, projectFileParentDirectoryName);
+            var filesTrackedByGit = FileHelper.GetFilesFromGitForProject(repoPath, projectPath);
+            var filesIncludedInProjectFile = FileHelper.GetFilesFromProjectFile(projectPath, out string projectFileParentDirectoryName);
 
             // Filter out project files, because project files do not include themselves . . .
             var self = FileHelper.NormalizePath(Path.GetRelativePath(repoPath, projectPath));
             filesTrackedByGit.Remove(self);
 
+            // Project files are case-insensitive . . .
+            // But git is case-sensitive . . .
             var filesNotIncludedInProjectFile = filesTrackedByGit.Where(m => !filesIncludedInProjectFile.Contains(m, StringComparer.CurrentCultureIgnoreCase)).ToList();
 
             if (filesNotIncludedInProjectFile?.Any() == true)
@@ -42,7 +37,7 @@ namespace Sisyphus.Commands
                     LogError($" ({Ordinal}) \t{file}");
                     Ordinal++;
                 }
-                Log("\n");
+                NL();
             }
 
             return Success;

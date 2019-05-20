@@ -105,8 +105,12 @@ namespace Sisyphus.Helpers
         */
         #endregion
 
-        public static HashSet<string> GetFilesFromGitForProject(string repoPath, string projectDirectoryName)
+        public static HashSet<string> GetFilesFromGitForProject(string repoPath, string projectPath)
         {
+            var absoluteProjectFileParentDirPath = FileHelper.GetParentDirectory(projectPath);
+            var projectFileParentDirectoryName = FileHelper.GetName(absoluteProjectFileParentDirPath);
+            var relativeProjectFileParentDir = Path.GetRelativePath(repoPath, absoluteProjectFileParentDirPath);
+
             var files = new HashSet<string>();
 
             using (var repo = new Repository(repoPath))
@@ -129,7 +133,7 @@ namespace Sisyphus.Helpers
                     }
                 }
 
-                var relevantTree = repo.Head.Tip.Tree.FirstOrDefault(t => t.Name == projectDirectoryName)?.Target;
+                var relevantTree = repo.Head.Tip.Tree.FirstOrDefault(t => t.Name == relativeProjectFileParentDir)?.Target;
 
                 if (relevantTree is Tree projectTree)
                 {

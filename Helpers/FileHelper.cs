@@ -55,11 +55,14 @@ namespace Sisyphus.Helpers
             return path.Replace("\\", "/");
         }
 
-        public static HashSet<string> GetFilesFromProjectFile(string projectFilePath, string projectDirectory)
+        public static HashSet<string> GetFilesFromProjectFile(string projectPath, out string projectFileParentDirectoryName)
         {
+            var absoluteProjectFileParentDirPath = FileHelper.GetParentDirectory(projectPath);
+            projectFileParentDirectoryName = FileHelper.GetName(absoluteProjectFileParentDirPath);
+
             var files = new HashSet<string>();
 
-            XDocument document = XDocument.Load(projectFilePath, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
+            XDocument document = XDocument.Load(projectPath, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
             XNamespace msBuildNamespace = document.Root.GetDefaultNamespace();
             XName itemGroupName = XName.Get("ItemGroup", msBuildNamespace.NamespaceName);
 
@@ -79,7 +82,7 @@ namespace Sisyphus.Helpers
                         var includePath = item.Attributes()?.FirstOrDefault(a => a.Name.LocalName == "Include")?.Value;
                         if (!string.IsNullOrWhiteSpace(includePath))
                         {
-                            files.Add($"{projectDirectory}/{includePath.Replace("\\", "/")}");
+                            files.Add($"{projectFileParentDirectoryName}/{includePath.Replace("\\", "/")}");
                         }
                     }
                 }
@@ -90,7 +93,7 @@ namespace Sisyphus.Helpers
 
         public static HashSet<string> GetAllFilesFromGit(string repoPath) => GitHelper.GetAllFilesFromGit(repoPath);
 
-        public static HashSet<string> GetFilesFromGitForProject(string repoPath, string projectDirectoryName) => GitHelper.GetFilesFromGitForProject(repoPath, projectDirectoryName);
+        public static HashSet<string> GetFilesFromGitForProject(string repoPath, string projectPath) => GitHelper.GetFilesFromGitForProject(repoPath, projectPath);
 
         public static HashSet<string> GetFilesOnDisk(string directoryPath)
         {

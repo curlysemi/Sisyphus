@@ -10,9 +10,19 @@ namespace Sisyphus.Commands
     {
         protected override (bool isSuccess, SError error) Run(Config config)
         {
+            void tryPrintConfig()
+            {
+                if (config != null)
+                {
+                    Log(JsonConvert.SerializeObject(config, Formatting.Indented));
+                }
+            }
+
+            tryPrintConfig();
+
             if (TryLoadConfigFromPathIfNull(ConfigPath, ref config, createIfNotExist: true))
             {
-                Log(JsonConvert.SerializeObject(config, Formatting.Indented));
+                tryPrintConfig();
 
                 return Success;
             }

@@ -23,6 +23,11 @@ namespace Sisyphus.Commands.Base
             Console.WriteLine(message);
         }
 
+        public void NL()
+        {
+            Console.WriteLine(string.Empty);
+        }
+
         public void LogNoLine(string message)
         {
             Console.Write(message);

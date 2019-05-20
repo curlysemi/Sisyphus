@@ -3,6 +3,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <AssemblyName>sisyphus</AssemblyName>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
     <OutputType>Exe</OutputType>
@@ -10,6 +11,7 @@
     <Company>Web Team</Company>
     <Product />
     <Version>0.0.1</Version>
+    <RootNamespace>Sisyphus</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
