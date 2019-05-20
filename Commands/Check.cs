@@ -22,7 +22,6 @@ namespace Sisyphus.Commands
 
             var filesTrackedByGit = GitHelper.GetFilesFromGitForProject(repoPath, projectPath);
             var filesIncludedInProjectFile = ProjectFileHelper.GetFilesFromProjectFile(projectPath, out string projectFileParentDirectoryName);
-            //ProjectFileHelper.GetNamePathMappingFromProjectFile(projectPath);
 
             // Filter out project files, because project files do not include themselves . . .
             var self = FileHelper.NormalizePath(Path.GetRelativePath(repoPath, projectPath));

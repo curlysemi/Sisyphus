@@ -1,6 +1,5 @@
 ﻿using CommandLine;
 using Sisyphus.Commands;
-using System;
 using System.Linq;
 
 namespace Sisyphus
@@ -19,13 +18,15 @@ namespace Sisyphus
                 Check,
                 Dedup,
                 Sort,
-                MkConf
+                MkConf,
+                VerDep
                 >(args)
             .MapResult(
               (Check cmd) => cmd.Execute(),
               (Dedup cmd) => cmd.Execute(),
               (Sort cmd) => cmd.Execute(),
               (MkConf cmd) => cmd.Execute(),
+              (VerDep cmd) => cmd.Execute(),
               errs => 1);
         }
     }

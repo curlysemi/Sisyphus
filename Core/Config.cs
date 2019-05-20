@@ -19,6 +19,8 @@ namespace Sisyphus.Core
 
         public HashSet<string> IgnorableFiles { get; set; } = new HashSet<string>();
 
+        public string RelativePackagesPath { get; set; }
+
         public static void ApplyDefaults(ref Config config)
         {
             config.IgnorableFiles.AddRange(
@@ -26,6 +28,8 @@ namespace Sisyphus.Core
                 "**.tfignore",
                 "**.excludes"
             );
+
+            config.RelativePackagesPath = @"..\packages\";
         }
 
         public bool IsIgnorable(string filePath)

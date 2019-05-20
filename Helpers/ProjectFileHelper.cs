@@ -1,4 +1,6 @@
-﻿using ByteDev.DotNet.Project;
+﻿// Copyright 2015 Kirill Osenkov
+// https://github.com/KirillOsenkov/CodeCleanupTools/blob/master/SortProjectItems/SortProjectItems.cs
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,13 +11,16 @@ namespace Sisyphus.Helpers
 {
     public static class ProjectFileHelper
     {
-        public static KeyValuePair<string, string>? GetNamePathMappingFromProjectFile(string projectFilePath)
+        public static (XDocument document, XElement[] itemGroups) LoadProjectXml(string projectPath)
         {
-            // ByteDev.DotNet.Project doesn't provide access to the includes :/
+            XDocument document = XDocument.Load(projectPath, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
+            XNamespace msBuildNamespace = document.Root.GetDefaultNamespace();
+            XName itemGroupName = XName.Get("ItemGroup", msBuildNamespace.NamespaceName);
 
-            var project = DotNetProject.Load(projectFilePath);
+            // only consider the top-level item groups, otherwise stuff inside Choose, Targets etc. will be broken
+            var itemGroups = document.Root.Elements(itemGroupName).ToArray();
 
-            return null;
+            return (document, itemGroups);
         }
 
         public static HashSet<string> GetFilesFromProjectFile(string projectPath, out string projectFileParentDirectoryName)
@@ -25,12 +30,7 @@ namespace Sisyphus.Helpers
 
             var files = new HashSet<string>();
 
-            XDocument document = XDocument.Load(projectPath, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
-            XNamespace msBuildNamespace = document.Root.GetDefaultNamespace();
-            XName itemGroupName = XName.Get("ItemGroup", msBuildNamespace.NamespaceName);
-
-            // only consider the top-level item groups, otherwise stuff inside Choose, Targets etc. will be broken
-            var itemGroups = document.Root.Elements(itemGroupName).ToArray();
+            var (document, itemGroups) = LoadProjectXml(projectPath);
 
             var fileNodes = new[] { "None", "Compile", "Content" };
 

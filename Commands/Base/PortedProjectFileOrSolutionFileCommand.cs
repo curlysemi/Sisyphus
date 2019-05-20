@@ -3,9 +3,9 @@
 // https://github.com/KirillOsenkov/CodeCleanupTools/blob/master/RemoveDuplicateItems/RemoveDuplicateItems.cs
 
 using Sisyphus.Core;
+using Sisyphus.Helpers;
 using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 
@@ -24,12 +24,7 @@ namespace Sisyphus.Commands.Base
         {
             Vlog(filePath);
 
-            XDocument document = XDocument.Load(filePath, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
-            XNamespace msBuildNamespace = document.Root.GetDefaultNamespace();
-            XName itemGroupName = XName.Get("ItemGroup", msBuildNamespace.NamespaceName);
-
-            // only consider the top-level item groups, otherwise stuff inside Choose, Targets etc. will be broken
-            var itemGroups = document.Root.Elements(itemGroupName).ToArray();
+            var (document, itemGroups) = ProjectFileHelper.LoadProjectXml(filePath);
 
             var shouldSave = ActOnProject(config, ref itemGroups);
             if (shouldSave)
