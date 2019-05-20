@@ -3,16 +3,17 @@
 
 using CommandLine;
 using Sisyphus.Commands.Base;
+using Sisyphus.Core;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
 namespace Sisyphus.Commands
 {
-    [Verb("sort", HelpText = "Sort the contents of the provided project file.")]
-    internal class Sort : ProjectFileCommand
+    [Verb("sort", HelpText = "Sort the contents of the provided project file or projects in provided solution file.")]
+    internal class Sort : PortedProjectFileOrSolutionFileCommand
     {
-        protected override bool ActOnProject(ref XElement[] itemGroups)
+        protected override bool ActOnProject(Config config, ref XElement[] itemGroups)
         {
             var processedItemGroups = new List<XElement>();
 

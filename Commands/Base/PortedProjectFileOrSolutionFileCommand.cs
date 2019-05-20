@@ -1,10 +1,9 @@
 ﻿// Copyright 2015–2016 Kirill Osenkov
 // https://github.com/KirillOsenkov/CodeCleanupTools/blob/master/SortProjectItems/SortProjectItems.cs
+// https://github.com/KirillOsenkov/CodeCleanupTools/blob/master/RemoveDuplicateItems/RemoveDuplicateItems.cs
 
-using CommandLine;
 using Sisyphus.Core;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -12,56 +11,16 @@ using System.Xml.Linq;
 
 namespace Sisyphus.Commands.Base
 {
-    internal abstract class ProjectFileCommand : BaseCommand
+    internal abstract class PortedProjectFileOrSolutionFileCommand : ProjectFileOrSolutionFileCommand
     {
-        [Option('i', "input", HelpText = "Input files to be processed.")]
-        public IEnumerable<string> Input { get; set; }
-
-        [Option('r', "recursive", HelpText = "Search recursively.")]
-        public bool IsRecursive { get; set; }
-
-        protected override (bool isSuccess, SError error) Run(Config config)
+        protected override (bool isSuccess, SError error) HandleProject(Config config, string repoPath, string projectPath)
         {
-            Vlog("Will sort!");
-
-            var input = Input ?? new List<string>();
-
-            bool noInputs = input.Count() == 0;
-            if (noInputs)
-            {
-                Vlog("No project files specified.");
-            }
-
-            if (noInputs || input.Count() == 1 && IsRecursive)
-            {
-                var searchOption = noInputs ? SearchOption.TopDirectoryOnly : SearchOption.AllDirectories;
-
-                var directory = input.FirstOrDefault() ?? Environment.CurrentDirectory;
-                Vlog($"Searching for project files in directory '{directory}'");
-
-                var files = Directory.GetFiles(directory, "*.csproj", searchOption)
-                    .Concat(Directory.GetFiles(directory, "*.vbproj", searchOption));
-                foreach (var file in files)
-                {
-                    ActOnProject(file);
-                }
-            }
-            else
-            {
-                if (File.Exists(input.First()))
-                {
-                    ActOnProject(input.First());
-                }
-                else
-                {
-                    return Error($"File not found: {input.First()}");
-                }
-            }
+            ActOnProject(config, projectPath);
 
             return Success;
         }
 
-        private void ActOnProject(string filePath)
+        private void ActOnProject(Config config, string filePath)
         {
             Vlog(filePath);
 
@@ -72,7 +31,7 @@ namespace Sisyphus.Commands.Base
             // only consider the top-level item groups, otherwise stuff inside Choose, Targets etc. will be broken
             var itemGroups = document.Root.Elements(itemGroupName).ToArray();
 
-            var shouldSave = ActOnProject(ref itemGroups);
+            var shouldSave = ActOnProject(config, ref itemGroups);
             if (shouldSave)
             {
                 var originalBytes = File.ReadAllBytes(filePath);
@@ -94,7 +53,7 @@ namespace Sisyphus.Commands.Base
             }
         }
 
-        protected abstract bool ActOnProject(ref XElement[] itemGroups);
+        protected abstract bool ActOnProject(Config config, ref XElement[] itemGroups);
 
         private static byte[] SyncBOM(byte[] originalBytes, byte[] newBytes)
         {
