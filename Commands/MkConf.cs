@@ -7,10 +7,10 @@ using static Sisyphus.Helpers.IOExtensions;
 
 namespace Sisyphus.Commands
 {
-    [Verb("mkconf", HelpText = "Create a new config file if none exists or print out an existing config")]
+    [Verb("mkconf", HelpText = "Create a new config file if none exists or print out an existing config.")]
     internal class MkConf : BaseCommand
     {
-        [Option("with-defaults", Required = false, HelpText = "If creating a new config, create with defaults")]
+        [Option("with-defaults", Required = false, HelpText = "If creating a new config, create with defaults, else adds defaults to existing config")]
         public bool WithDefaults { get; set; }
 
         protected override bool ShouldTryDefaultConfigLoad => false;

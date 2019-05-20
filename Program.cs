@@ -9,6 +9,7 @@ namespace Sisyphus
     {
         public static int Main(string[] args)
         {
+            // If no arguments were provided, let's default to the 'help' command
             if (args?.Any() != true)
             {
                 args = new[] { "--help" };
