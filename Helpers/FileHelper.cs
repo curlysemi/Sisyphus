@@ -59,5 +59,19 @@ namespace Sisyphus.Helpers
         {
             throw new NotImplementedException();
         }
+
+        public static string Join(params string[] paths)
+        {
+            string path = paths?.FirstOrDefault();
+            if (paths?.Length > 1)
+            {
+                foreach (var p in paths.Skip(1))
+                {
+                    path = Path.Join(path, p);
+                }
+            }
+
+            return path;
+        }
     }
 }

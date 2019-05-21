@@ -17,6 +17,14 @@ namespace Sisyphus.Core
     {
         private string ConfigPath { get; set; }
 
+        [Obsolete("Not intended for direct use, but used for deserialization")]
+        public Config() { }
+
+        public Config(string path)
+        {
+            ConfigPath = FixPath(path);
+        }
+
         public HashSet<string> IgnorableFiles { get; set; } = new HashSet<string>();
 
         public string RelativePackagesPath { get; set; }
@@ -50,6 +58,18 @@ namespace Sisyphus.Core
             return false;
         }
 
+        private static string FixPath(string configPath)
+        {
+            if (!configPath.EndsWith(Constants.SISYPHUS_CONFIG_FILENAME))
+            {
+                return Path.Join(configPath, Constants.SISYPHUS_CONFIG_FILENAME);
+            }
+            else
+            {
+                return configPath;
+            }
+        }
+
         public static bool TryLoadConfig(string configPath, out Config config)
         {
             config = null;
@@ -77,24 +97,32 @@ namespace Sisyphus.Core
                 }
                 else
                 {
-                    LogNoLine($"'{filePath}' does not exist! ");
+                    Log($"'{filePath}' does not exist! ");
                 }
             }
 
             return config != null;
         }
 
-        public static bool TryLoadConfigFromPathIfNull(string path, ref Config config, bool createIfNotExist = false, bool addDefaults = false, bool suppressWarning = false)
+        public static bool TryLoadConfigFromPathIfNull(string path, ref Config config, bool createIfNotExist = false, bool? addDefaults = null, bool suppressWarning = false)
         {
-            if (config == null || addDefaults)
+            if (config == null || addDefaults == true)
             {
                 bool wasCreated;
                 if (wasCreated = config == null && !TryLoadConfig(path, out config) && createIfNotExist)
                 {
-                    config = new Config();
+                    if (!addDefaults.HasValue)
+                    {
+                        addDefaults = true;
+                    }
+                    config = new Config(path);
+                }
+                else if (!addDefaults.HasValue)
+                {
+                    addDefaults = false;
                 }
 
-                if (addDefaults)
+                if (addDefaults.Value)
                 {
                     if (!createIfNotExist)
                     {
@@ -105,7 +133,7 @@ namespace Sisyphus.Core
                 }
 
                 // Save
-                if (wasCreated || addDefaults)
+                if (wasCreated || addDefaults.Value)
                 {
                     config.Save();
                 }

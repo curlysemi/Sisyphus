@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Sisyphus.Core
 {
-    class PackageReference
+    class DepReference
     {
         private Dictionary<string, string> _subAttributes = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
@@ -35,9 +35,9 @@ namespace Sisyphus.Core
 
         public Version Version { get; set; }
 
-        public PackageHintPath HintPath { get; set; }
+        public DepHintPath HintPath { get; set; }
 
-        public PackageReference(string packageIncludeString, string hintPath)
+        public DepReference(string packageIncludeString, string hintPath)
         {
             OriginalString = packageIncludeString;
 
@@ -64,7 +64,7 @@ namespace Sisyphus.Core
 
             if (hintPath != null)
             {
-                HintPath = new PackageHintPath(hintPath);
+                HintPath = new DepHintPath(hintPath);
             }
         }
     }

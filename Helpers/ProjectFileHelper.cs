@@ -23,10 +23,15 @@ namespace Sisyphus.Helpers
             return (document, itemGroups);
         }
 
-        public static HashSet<string> GetFilesFromProjectFile(string projectPath, out string projectFileParentDirectoryName)
+        public static string GetProjectFileParentDirName(string projectPath)
         {
             var absoluteProjectFileParentDirPath = FileHelper.GetParentDirectory(projectPath);
-            projectFileParentDirectoryName = FileHelper.GetName(absoluteProjectFileParentDirPath);
+            return FileHelper.GetName(absoluteProjectFileParentDirPath);
+        }
+
+        public static HashSet<string> GetFilesFromProjectFile(string projectPath, out string projectFileParentDirectoryName)
+        {
+            projectFileParentDirectoryName = GetProjectFileParentDirName(projectPath);
 
             var files = new HashSet<string>();
 

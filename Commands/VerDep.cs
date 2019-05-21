@@ -15,6 +15,19 @@ namespace Sisyphus.Commands
     [Verb("verdep", HelpText = "Check the provided solution or project file for dependency conflicts.")]
     internal class VerDep : ProjectFileOrSolutionFileCommand
     {
+        [Option('p', "hint-paths", HelpText = "Print protential HintPath discrepancies")]
+        public bool ShouldPrintPotentialHintPathDiscrepancies { get; set; }
+
+        [Option('f', "ignore-framework", HelpText = "When checking HintPath discrepancies, ignore differences in target frameworks")]
+        public bool ShouldIgnoreTargetFrameworks { get; set; }
+
+        [Option('d', "on-disk", HelpText = "When checking HintPath discrepancies, check that the packages are on disk")]
+        public bool ShouldCheckPackagesOnDisk { get; set; }
+
+        private int NumDiscrepancies { get; set; } = 0;
+        private int NumNoHPs { get; set; } = 0;
+        private int NumFine { get; set; } = 0;
+
         bool HasElement(XElement e, string elementName)
         {
             return IsElement(e.Descendants()?.FirstOrDefault(), elementName);
@@ -40,77 +53,127 @@ namespace Sisyphus.Commands
             return IsElement(e, "HintPath");
         }
 
+        private string MakeAgnosticHintPath(string hintPath, string depName)
+        {
+            const string lib = @"\lib\";
+            var libIndex = hintPath.LastIndexOf(lib);
+            var dllName = $"{depName}.dll";
+            var dllIndex = hintPath.LastIndexOf(dllName);
+
+            var agnosticPath = hintPath.Substring(0, libIndex + lib.Length) + hintPath.Substring(dllIndex, dllName.Length);
+
+            return agnosticPath;
+        }
+
         protected override (bool isSuccess, SError error) HandleProject(Config config, string repoPath, string projectPath)
         {
-            // TODO: setting to warn of duplicates when treating git files in a case-insensitive manner . . .
-            // Because `thing.txt` and `Thing.txt` could theoretically both exist . . .
-
-            //var filesTrackedByGit = GitHelper.GetFilesFromGitForProject(repoPath, projectPath);
-            //var filesIncludedInProjectFile = ProjectFileHelper.GetFilesFromProjectFile(projectPath, out string projectFileParentDirectoryName);
-
-            //// Filter out project files, because project files do not include themselves . . .
-            //var self = FileHelper.NormalizePath(Path.GetRelativePath(repoPath, projectPath));
-            //filesTrackedByGit.Remove(self);
-
-            //// Remove any other files our config says we can ignore before we compare . . .
-            //filesTrackedByGit.RemoveWhere(config.IsIgnorable);
-
-            //// Project files are case-insensitive . . .
-            //// But git is case-sensitive . . .
-            //var filesNotIncludedInProjectFile = filesTrackedByGit.Where(m => !filesIncludedInProjectFile.Contains(m, StringComparer.CurrentCultureIgnoreCase)).ToList();
-
-            //if (filesNotIncludedInProjectFile?.Any() == true)
-            //{
-            //    Log(projectFileParentDirectoryName + ":");
-            //    foreach (var file in filesNotIncludedInProjectFile)
-            //    {
-            //        LogError($" ({Ordinal}) \t{file}");
-            //        Ordinal++;
-            //    }
-            //    NL();
-            //}
+            var projName = ProjectFileHelper.GetProjectFileParentDirName(projectPath);
 
             var packageRefs = GetPackageReferencesFromProjectFile(projectPath);
             var packagesConf = GetPackagesFromPackagesDotConfig(projectPath);
+
+            var primaryDependencies = packageRefs.Where(p => packagesConf.Any(c => c.Name == p.Name));
+
+            if (ShouldPrintPotentialHintPathDiscrepancies)
+            {
+                foreach (var primaryDep in primaryDependencies)
+                {
+                    var relevantConf = packagesConf.First(c => c.Name == primaryDep.Name);
+                    var projectedHintPath = relevantConf.ProjectHintPath(config);
+                    var hintPath = primaryDep.HintPath?.Path;
+                    bool hasHintPath = hintPath != null;
+                    bool isFine = true;
+                    if (hasHintPath && !string.Equals(hintPath, projectedHintPath, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        if (ShouldIgnoreTargetFrameworks)
+                        {
+                            var agnosticHintPath = MakeAgnosticHintPath(hintPath, primaryDep.Name);
+                            var agnosticProjectedPath = MakeAgnosticHintPath(projectedHintPath, relevantConf.Name);
+
+                            if (string.Equals(agnosticHintPath, agnosticProjectedPath, StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                goto isFineHandler;
+                            }
+                        }
+                        isFine = false;
+                        NumDiscrepancies++;
+                        Log($"{projName}'s '{primaryDep.Name}':");
+                        Log("HP:\t" + hintPath);
+                        Log("GP:\t" + projectedHintPath);
+                        NL();
+                    }
+                    else if (!hasHintPath)
+                    {
+                        isFine = false;
+                        Log($"{projName}'s '{primaryDep.Name}' has no hint path");
+                        NL();
+                        NumNoHPs++;
+                    }
+
+                    isFineHandler:
+                    if (isFine)
+                    {
+                        NumFine++;
+                    }
+                }
+            }
 
             // TODO: Determine if projects can have multiple references to the same package (but different versions)?
 
             return Success;
         }
 
-        public List<PackageReference> GetPackageReferencesFromProjectFile(string projectPath)
+        protected override void AfterAll(Config config, string repoPath, ref List<string> absoluteProjectFilePaths)
         {
-            var packageRefs = new List<PackageReference>();
+            Log($"Number of discrepancies:  {NumDiscrepancies}");
+            Log($"Number of no HintPaths:   {NumNoHPs}");
+            Log($"Number of fine HintPaths: {NumFine}");
+        }
+
+        public List<DepReference> GetPackageReferencesFromProjectFile(string projectPath)
+        {
+            var packageRefs = new List<DepReference>();
 
             var (document, itemGroups) = ProjectFileHelper.LoadProjectXml(projectPath);
 
             var refItemGroup = itemGroups.FirstOrDefault(HasReference);
-            var refsOnly = refItemGroup.Descendants()?.Where(IsReference);
+            var refsOnly = refItemGroup?.Descendants()?.Where(IsReference);
 
-            foreach (var @ref in refsOnly)
+            if (refsOnly?.Any() == true)
             {
-                string hintPath = @ref.Descendants()?.FirstOrDefault(IsHintPath)?.Value;
-
-                string packageIncludeString = @ref.Attributes().FirstOrDefault(a => a.Name == "Include")?.Value;
-                if (packageIncludeString != null)
+                foreach (var @ref in refsOnly)
                 {
-                    var packageRef = new PackageReference(packageIncludeString, hintPath);
-                    packageRefs.Add(packageRef);
+                    string hintPath = @ref.Descendants()?.FirstOrDefault(IsHintPath)?.Value;
+
+                    string packageIncludeString = @ref.Attributes().FirstOrDefault(a => a.Name == "Include")?.Value;
+                    if (packageIncludeString != null)
+                    {
+                        var packageRef = new DepReference(packageIncludeString, hintPath);
+                        packageRefs.Add(packageRef);
+                    }
                 }
             }
 
             return packageRefs;
         }
 
-        public List<string> GetPackagesFromPackagesDotConfig(string projectPath)
+        public List<DepConfig> GetPackagesFromPackagesDotConfig(string projectPath)
         {
-            var packages = new List<string>();
+            var packages = new List<DepConfig>();
 
             var projectDir = FileHelper.GetParentDirectory(projectPath);
             var packageJsonFilePath = Path.Join(projectDir, "packages.config");
             XDocument document = XDocument.Load(packageJsonFilePath, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
 
-            //document.Root
+            var packageElements = document.Root.Elements("package");
+            if (packageElements?.Any() == true)
+            {
+                foreach (var package in packageElements)
+                {
+                    var depConfig = new DepConfig(package);
+                    packages.Add(depConfig);
+                }
+            }
 
             return packages;
         }

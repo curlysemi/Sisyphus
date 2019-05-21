@@ -4,10 +4,10 @@ using System.Text;
 
 namespace Sisyphus.Core
 {
-    class PackageHintPath
+    class DepHintPath
     {
-        string Path { get; set; }
-        public PackageHintPath(string path)
+        public string Path { get; set; }
+        public DepHintPath(string path)
         {
             Path = path;
         }
