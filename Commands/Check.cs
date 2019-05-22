@@ -54,7 +54,7 @@ namespace Sisyphus.Commands
             }
             else
             {
-                Log($"'{projectFileParentDirectoryName}' is not missing any files. :)");
+                Log($"'{projectFileParentDirectoryName}' is not missing any files.");
                 NL();
             }
 
