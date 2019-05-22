@@ -26,6 +26,8 @@ namespace Sisyphus.Core
 
         public HashSet<string> IgnorableFiles { get; set; } = new HashSet<string>();
 
+        public HashSet<string> SupportedFrameworks { get; set; } = new HashSet<string>();
+
         public string RelativePackagesPath { get; set; }
 
         public static void ApplyDefaults(ref Config config)
@@ -37,6 +39,10 @@ namespace Sisyphus.Core
             );
 
             config.RelativePackagesPath = @"..\packages\";
+
+            config.SupportedFrameworks.AddRange(
+                "*"
+            );
         }
 
         public bool IsIgnorable(string filePath)
