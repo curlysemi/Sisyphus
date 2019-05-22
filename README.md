@@ -33,6 +33,8 @@ Using the `help` command, the options for a particular command can be shown:
 
 ```bash
 $ sisyphus help check
+```
+```
 sisyphus 0.0.1
 Copyright (C) 2019 Web Team
 
