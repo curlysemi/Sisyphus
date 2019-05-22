@@ -15,16 +15,16 @@ namespace Sisyphus.Commands
     [Verb("verdep", HelpText = "Check the provided solution or project file for dependency conflicts.")]
     internal class VerDep : ProjectFileOrSolutionFileCommand
     {
-        [Option('p', "hint-paths", HelpText = "Print protential HintPath discrepancies")]
+        [Option('p', "hint-paths", HelpText = "Print protential HintPath discrepancies.")]
         public bool ShouldPrintPotentialHintPathDiscrepancies { get; set; }
 
-        [Option('f', "ignore-framework", HelpText = "When checking HintPath discrepancies, ignore differences in target frameworks")]
+        [Option('f', "ignore-framework", HelpText = "When checking HintPath discrepancies, ignore differences in target frameworks.")]
         public bool ShouldIgnoreTargetFrameworks { get; set; }
 
-        [Option('d', "on-disk", HelpText = "When checking HintPath discrepancies, check that the packages are on disk")]
+        [Option('d', "on-disk", HelpText = "When checking HintPath discrepancies, check that the packages are on disk.")]
         public bool ShouldCheckPackagesOnDisk { get; set; }
 
-        [Option('e', "errors", HelpText = "Consider any issues to be errors (non-zero return)")]
+        [Option('e', "errors", HelpText = "Consider any issues to be errors (non-zero return).")]
         public bool IsErrorMode { get; set; }
 
         private int NumDiscrepancies { get; set; } = 0;

@@ -33,7 +33,7 @@ namespace Sisyphus.Core
             config.IgnorableFiles.AddRange(
                 "**.gitignore",
                 "**.tfignore",
-                "**.excludes"
+                "**.exclude"
             );
 
             config.RelativePackagesPath = @"..\packages\";

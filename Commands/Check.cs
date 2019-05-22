@@ -10,7 +10,7 @@ using static Sisyphus.Helpers.IOExtensions;
 
 namespace Sisyphus.Commands
 {
-    [Verb("check", HelpText = "Check the provided solution or project file for issues.")]
+    [Verb("check", HelpText = "Check the provided solution or project file for missing includes.")]
     internal class Check : ProjectFileOrSolutionFileCommand
     {
         private int Ordinal { get; set; } = 1;

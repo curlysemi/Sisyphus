@@ -9,7 +9,7 @@ namespace Sisyphus.Commands.Base
 {
     internal abstract class ProjectFileOrSolutionFileCommand : BaseCommand
     {
-        [Option('i', "input", HelpText = "Input project file of solution file path")]
+        [Option('i', "input", HelpText = "Input project file of solution file path.")]
         public string ProjectFileOrSolutionFilePath { get; set; }
 
         protected virtual (bool isSuccess, SError error) BeforeAll(Config config, string repoPath, ref List<string> absoluteProjectFilePaths) => Success;
