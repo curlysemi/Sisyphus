@@ -11,7 +11,7 @@ namespace Sisyphus.Commands.Base
         [Option('v', "verbose", Required = false, HelpText = "Run with verbose logging.")]
         public bool IsVerbose { get; set; }
 
-        [Option('c', "config", Required = false, HelpText = "Set the path for the 'Sisyphus.js' configuation file (commands that take an input path argument will check for a nearby config file by default).")]
+        [Option('c', "config", Required = false, HelpText = "Set the path for the 'Sisyphus.js' configuration file (commands that take an input path argument will check for a nearby config file by default).")]
         public string ConfigPath { get; set; }
 
         public static (bool isSuccess, SError error) Success => (true, null);

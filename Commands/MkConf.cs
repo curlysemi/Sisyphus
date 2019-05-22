@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Sisyphus.Commands.Base;
 using Sisyphus.Core;
+using System;
 
 using static Sisyphus.Helpers.IOExtensions;
 
@@ -26,6 +27,8 @@ namespace Sisyphus.Commands
             }
 
             tryPrintConfig();
+
+            ConfigPath = ConfigPath ?? Environment.CurrentDirectory;
 
             if (Config.TryLoadConfigFromPathIfNull(ConfigPath, ref config, createIfNotExist: true, addDefaults: WithDefaults))
             {

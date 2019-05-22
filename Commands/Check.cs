@@ -3,6 +3,7 @@ using Sisyphus.Commands.Base;
 using Sisyphus.Core;
 using Sisyphus.Helpers;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -14,6 +15,11 @@ namespace Sisyphus.Commands
     internal class Check : ProjectFileOrSolutionFileCommand
     {
         private int Ordinal { get; set; } = 1;
+
+        [Option('e', "errors", HelpText = "Consider any issues to be errors (non-zero return).")]
+        public bool IsErrorMode { get; set; }
+
+        private bool _errorOccurred { get; set; }
 
         protected override (bool isSuccess, SError error) HandleProject(Config config, string repoPath, string projectPath)
         {
@@ -36,6 +42,8 @@ namespace Sisyphus.Commands
 
             if (filesNotIncludedInProjectFile?.Any() == true)
             {
+                _errorOccurred = true;
+
                 Log(projectFileParentDirectoryName + ":");
                 foreach (var file in filesNotIncludedInProjectFile)
                 {
@@ -44,8 +52,25 @@ namespace Sisyphus.Commands
                 }
                 NL();
             }
+            else
+            {
+                Log($"'{projectFileParentDirectoryName}' is not missing any files. :)");
+                NL();
+            }
 
             return Success;
+        }
+
+        protected override (bool isSuccess, SError error) AfterAll(Config config, string repoPath, ref List<string> absoluteProjectFilePaths)
+        {
+            if (IsErrorMode && _errorOccurred)
+            {
+                return Error("File(s) were missing from project(s).");
+            }
+            else
+            {
+                return Success;
+            }
         }
     }
 }

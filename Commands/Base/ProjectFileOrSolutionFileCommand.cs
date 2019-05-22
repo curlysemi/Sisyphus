@@ -2,6 +2,7 @@
 using Sisyphus.Core;
 using Sisyphus.Core.Enums;
 using Sisyphus.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,7 +11,7 @@ namespace Sisyphus.Commands.Base
     internal abstract class ProjectFileOrSolutionFileCommand : BaseCommand
     {
         [Option('i', "input", HelpText = "Input project file of solution file path.")]
-        public string ProjectFileOrSolutionFilePath { get; set; }
+        public string ProjectFileOrSolutionFilePath { get; set; } = Environment.CurrentDirectory;
 
         protected virtual (bool isSuccess, SError error) BeforeAll(Config config, string repoPath, ref List<string> absoluteProjectFilePaths) => Success;
 
