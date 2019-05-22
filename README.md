@@ -49,3 +49,9 @@ Copyright (C) 2019 Web Team
 
   --version        Display version information.
 ```
+
+## Setup
+There's several different ways that `sisyphus` can be integrated with legacy-format .NET projects. Here are some ideas:
+1. As a utility that is manually invoked. Either install locally and add to your PATH or add the EXE to repo.
+3. As a utility that is invoked using the post-checkout git hook.
+2. As a pre-build (or post-build) event.
