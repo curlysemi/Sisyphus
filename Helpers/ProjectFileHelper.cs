@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Xml.Linq;
 
 namespace Sisyphus.Helpers
@@ -23,15 +22,15 @@ namespace Sisyphus.Helpers
             return (document, itemGroups);
         }
 
-        public static string GetProjectFileParentDirName(string projectPath)
+        public static string GetProjectFileParentDirName(string projectPath, out string absoluteProjectFileParentDirPath)
         {
-            var absoluteProjectFileParentDirPath = FileHelper.GetParentDirectory(projectPath);
+            absoluteProjectFileParentDirPath = FileHelper.GetParentDirectory(projectPath);
             return FileHelper.GetName(absoluteProjectFileParentDirPath);
         }
 
         public static HashSet<string> GetFilesFromProjectFile(string projectPath, out string projectFileParentDirectoryName)
         {
-            projectFileParentDirectoryName = GetProjectFileParentDirName(projectPath);
+            projectFileParentDirectoryName = GetProjectFileParentDirName(projectPath, out _);
 
             var files = new HashSet<string>();
 

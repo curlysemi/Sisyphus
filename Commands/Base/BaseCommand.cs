@@ -8,7 +8,7 @@ namespace Sisyphus.Commands.Base
 {
     internal abstract class BaseCommand
     {
-        [Option('v', "verbose", Required = false, HelpText = "Run with verbose logging.")]
+        [Option('v', "verbose", Required = false, HelpText = "Run with verbose logging")]
         public bool IsVerbose { get; set; }
 
         [Option('c', "config", Required = false, HelpText = "Set the path for the 'Sisyphus.js' configuation file")]

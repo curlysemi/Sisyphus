@@ -1,12 +1,7 @@
 ﻿using Sisyphus.Helpers;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Xml.Linq;
-
-using static Sisyphus.Helpers.IOExtensions;
 
 namespace Sisyphus.Core
 {
@@ -24,7 +19,8 @@ namespace Sisyphus.Core
 
         public string ProjectHintPath(Config config)
         {
-            return FileHelper.Join(config.RelativePackagesPath, $"{Name}.{VersionString}", "lib", TargetFramework, $"{Name}.dll");
+            string relativePackagesPath = config?.RelativePackagesPath ?? @"..\packages\";
+            return FileHelper.Join(relativePackagesPath, $"{Name}.{VersionString}", "lib", TargetFramework, $"{Name}.dll");
         }
 
         public DepConfig(XElement packageElement)

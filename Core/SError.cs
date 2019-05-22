@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Sisyphus.Core
+﻿namespace Sisyphus.Core
 {
     public class SError
     {

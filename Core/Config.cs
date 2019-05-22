@@ -1,14 +1,13 @@
 ﻿using DotNet.Globbing;
+using Newtonsoft.Json;
+using Sisyphus.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Linq;
 using System.Text.RegularExpressions;
-using Newtonsoft.Json;
-using Sisyphus.Helpers;
 
 using static Sisyphus.Helpers.IOExtensions;
-using System.Linq;
 
 namespace Sisyphus.Core
 {

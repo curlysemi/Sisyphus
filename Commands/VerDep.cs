@@ -24,9 +24,25 @@ namespace Sisyphus.Commands
         [Option('d', "on-disk", HelpText = "When checking HintPath discrepancies, check that the packages are on disk")]
         public bool ShouldCheckPackagesOnDisk { get; set; }
 
+        [Option('e', "errors", HelpText = "Consider any issues to be errors (non-zero return)")]
+        public bool IsErrorMode { get; set; }
+
         private int NumDiscrepancies { get; set; } = 0;
         private int NumNoHPs { get; set; } = 0;
         private int NumFine { get; set; } = 0;
+
+        private Dictionary<string, List<string>> MissingPackages { get; set; } = new Dictionary<string, List<string>>();
+        private void AddMissingPackageOccurrence(string absPackagePath, string projectName)
+        {
+            if (MissingPackages.ContainsKey(absPackagePath))
+            {
+                MissingPackages[absPackagePath].Add(projectName);
+            }
+            else
+            {
+                MissingPackages[absPackagePath] = new List<string> { projectName };
+            }
+        }
 
         bool HasElement(XElement e, string elementName)
         {
@@ -67,7 +83,7 @@ namespace Sisyphus.Commands
 
         protected override (bool isSuccess, SError error) HandleProject(Config config, string repoPath, string projectPath)
         {
-            var projName = ProjectFileHelper.GetProjectFileParentDirName(projectPath);
+            var projName = ProjectFileHelper.GetProjectFileParentDirName(projectPath, out string absoluteProjectFileParentDirPath);
 
             var packageRefs = GetPackageReferencesFromProjectFile(projectPath);
             var packagesConf = GetPackagesFromPackagesDotConfig(projectPath);
@@ -82,6 +98,17 @@ namespace Sisyphus.Commands
                     var projectedHintPath = relevantConf.ProjectHintPath(config);
                     var hintPath = primaryDep.HintPath?.Path;
                     bool hasHintPath = hintPath != null;
+
+                    if (hasHintPath && ShouldCheckPackagesOnDisk)
+                    {
+                        // HintPaths are relative, so we need to make the path absolute . . .
+                        string absoluteHintPath = Path.GetFullPath(hintPath, absoluteProjectFileParentDirPath);
+                        if (!File.Exists(absoluteHintPath))
+                        {
+                            AddMissingPackageOccurrence(absoluteHintPath, projName);
+                        }
+                    }
+
                     bool isFine = true;
                     if (hasHintPath && !string.Equals(hintPath, projectedHintPath, StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -118,16 +145,47 @@ namespace Sisyphus.Commands
                 }
             }
 
-            // TODO: Determine if projects can have multiple references to the same package (but different versions)?
-
             return Success;
         }
 
-        protected override void AfterAll(Config config, string repoPath, ref List<string> absoluteProjectFilePaths)
+        protected override (bool isSuccess, SError error) AfterAll(Config config, string repoPath, ref List<string> absoluteProjectFilePaths)
         {
-            Log($"Number of discrepancies:  {NumDiscrepancies}");
-            Log($"Number of no HintPaths:   {NumNoHPs}");
-            Log($"Number of fine HintPaths: {NumFine}");
+            var l = new LogBuilder(IsVerbose);
+
+            bool anErrorOccurred = IsErrorMode && (NumDiscrepancies > 0 || NumNoHPs > 0 || MissingPackages.Any());
+
+            l.Log($"Number of discrepancies:  {NumDiscrepancies}");
+            l.Log($"Number of no HintPaths:   {NumNoHPs}");
+            l.Log($"Number of fine HintPaths: {NumFine}");
+
+            if (MissingPackages.Any())
+            {
+                l.NL();
+                l.NL();
+
+                l.Log("The following packages were missing:");
+                foreach (var missingPackageKVP in MissingPackages)
+                {
+                    l.Log($"\t{missingPackageKVP.Key}");
+                    l.Log($"\tUsed by {missingPackageKVP.Value.Count} projects:");
+                    foreach (var proj in missingPackageKVP.Value)
+                    {
+                        l.Log($"\t\t{proj}");
+                    }
+                    l.NL();
+                }
+            }
+
+            if (anErrorOccurred)
+            {
+                return (isSuccess: false, error: l.ToString());
+            }
+            else
+            {
+                NL();
+                LogNoLine(l.ToString());
+                return Success;
+            }
         }
 
         public List<DepReference> GetPackageReferencesFromProjectFile(string projectPath)

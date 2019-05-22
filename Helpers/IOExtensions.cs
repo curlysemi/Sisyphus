@@ -1,11 +1,9 @@
 ﻿using Sisyphus.Core;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Sisyphus.Helpers
 {
-    class IOExtensions
+    internal class IOExtensions
     {
         public static void Log(string message)
         {
@@ -29,11 +27,6 @@ namespace Sisyphus.Helpers
                 Log(message);
             }
         }
-
-        //public void LogLines(params string[] lines)
-        //{
-        //    Console.Write()
-        //}
 
         public static void LogError(SError error)
         {

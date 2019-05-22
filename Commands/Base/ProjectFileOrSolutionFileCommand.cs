@@ -12,11 +12,11 @@ namespace Sisyphus.Commands.Base
         [Option('i', "input", HelpText = "Input project file of solution file path")]
         public string ProjectFileOrSolutionFilePath { get; set; }
 
-        protected virtual void BeforeAll(Config config, string repoPath, ref List<string> absoluteProjectFilePaths) { }
+        protected virtual (bool isSuccess, SError error) BeforeAll(Config config, string repoPath, ref List<string> absoluteProjectFilePaths) => Success;
 
         protected abstract (bool isSuccess, SError error) HandleProject(Config config, string repoPath, string projectPath);
 
-        protected virtual void AfterAll(Config config, string repoPath, ref List<string> absoluteProjectFilePaths) { }
+        protected virtual (bool isSuccess, SError error) AfterAll(Config config, string repoPath, ref List<string> absoluteProjectFilePaths) => Success;
 
         protected override (bool isSuccess, SError error) PreRunSetup(ref Config config)
         {
@@ -80,7 +80,11 @@ namespace Sisyphus.Commands.Base
                     }
             }
 
-            BeforeAll(config, RepoPath, ref absoluteProjectFilePaths);
+            var beforeAllResult = BeforeAll(config, RepoPath, ref absoluteProjectFilePaths);
+            if (!beforeAllResult.isSuccess)
+            {
+                return beforeAllResult;
+            }
 
             foreach (var projectPath in absoluteProjectFilePaths)
             {
@@ -91,9 +95,7 @@ namespace Sisyphus.Commands.Base
                 }
             }
 
-            AfterAll(config, RepoPath, ref absoluteProjectFilePaths);
-
-            return Success;
+            return AfterAll(config, RepoPath, ref absoluteProjectFilePaths);
         }
     }
 }

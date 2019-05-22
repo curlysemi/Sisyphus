@@ -1,11 +1,8 @@
-﻿using System;
+﻿using Sisyphus.Core.Enums;
+using System;
 using System.Collections.Generic;
-using System.Text;
-using LibGit2Sharp;
-using System.Linq;
-using System.Xml.Linq;
-using Sisyphus.Core.Enums;
 using System.IO;
+using System.Linq;
 
 namespace Sisyphus.Helpers
 {
