@@ -69,9 +69,6 @@ namespace Sisyphus.Commands
             return IsElement(e, "HintPath");
         }
 
-        private HashSet<string> ConfigFrameworks { get; set; } = new HashSet<string>();
-        private HashSet<string> ActualFrameworks { get; set; } = new HashSet<string>();
-
         private string MakeAgnosticHintPath(string hintPath, string depName)
         {
             const string lib = @"\lib\";
@@ -79,14 +76,7 @@ namespace Sisyphus.Commands
             var dllName = $"{depName}.dll";
             var dllIndex = hintPath.LastIndexOf(dllName);
 
-            var frameworkIndex = libIndex + lib.Length;
-            var framework = hintPath.Substring(frameworkIndex, dllIndex - frameworkIndex).Replace(@"\", string.Empty).ToLower();
-            if (!string.IsNullOrEmpty(framework))
-            {
-                ActualFrameworks.Add(framework);
-            }
-
-            var agnosticPath = hintPath.Substring(0, frameworkIndex) + hintPath.Substring(dllIndex, dllName.Length);
+            var agnosticPath = hintPath.Substring(0, libIndex + lib.Length) + hintPath.Substring(dllIndex, dllName.Length);
 
             return agnosticPath;
         }
@@ -97,8 +87,6 @@ namespace Sisyphus.Commands
 
             var packageRefs = GetPackageReferencesFromProjectFile(projectPath);
             var packagesConf = GetPackagesFromPackagesDotConfig(projectPath);
-
-            ConfigFrameworks.AddRange(packagesConf.Select(p => p.TargetFramework?.ToLower()).Where(p => !string.IsNullOrEmpty(p)).ToArray());
 
             var primaryDependencies = packageRefs.Where(p => packagesConf.Any(c => c.Name == p.Name));
 
