@@ -36,7 +36,7 @@ namespace Sisyphus.Helpers
 
             var (document, itemGroups) = LoadProjectXml(projectPath);
 
-            var fileNodes = new[] { "None", "Compile", "Content" };
+            var fileNodes = new[] { "None", "Compile", "Content", "EmbeddedResource" };
 
             foreach (XElement itemGroup in itemGroups)
             {
