@@ -97,7 +97,7 @@ namespace Sisyphus.Core
                 }
                 else
                 {
-                    Log($"'{filePath}' does not exist! ");
+                    Log($"'{filePath}' does not exist.");
                 }
             }
 

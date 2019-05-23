@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using static Sisyphus.Helpers.IOExtensions;
+
 namespace Sisyphus.Commands.Base
 {
     internal abstract class ProjectFileOrSolutionFileCommand : BaseCommand
@@ -13,7 +15,11 @@ namespace Sisyphus.Commands.Base
         [Option('i', "input", HelpText = "Input project file of solution file path.")]
         public string ProjectFileOrSolutionFilePath { get; set; } = Environment.CurrentDirectory;
 
-        protected virtual (bool isSuccess, SError error) BeforeAll(Config config, string repoPath, ref List<string> absoluteProjectFilePaths) => Success;
+        protected virtual (bool isSuccess, SError error) BeforeAll(Config config, string repoPath, ref List<string> absoluteProjectFilePaths)
+        {
+            Log("------ sisyphus started ------");
+            return Success;
+        }
 
         protected abstract (bool isSuccess, SError error) HandleProject(Config config, string repoPath, string projectPath);
 
@@ -51,6 +57,8 @@ namespace Sisyphus.Commands.Base
             {
                 Config.TryLoadConfigFromPathIfNull(RepoPath, ref config, suppressWarning: true);
             }
+
+            NL();
 
             return base.PreRunSetup(ref config);
         }
