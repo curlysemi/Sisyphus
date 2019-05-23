@@ -32,7 +32,7 @@ namespace Sisyphus.Helpers
         {
             var colorBefore = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Red;
-            Log(error);
+            Log($"ERROR: {error}");
             Console.ForegroundColor = colorBefore;
         }
 
@@ -48,7 +48,7 @@ namespace Sisyphus.Helpers
         {
             var colorBefore = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Red;
-            Log("An unexpected error occurred!");
+            Log("ERROR: An unexpected error occurred!");
             Log(ex.Message);
             if (isVerbose)
             {

@@ -29,7 +29,9 @@ namespace Sisyphus.Commands.Base
         {
             try
             {
+                Log("------ sisyphus started ------");
                 Vlog("Verbose logging enabled!");
+                Vlog("\n");
 
                 Config config = null;
                 if (ShouldTryDefaultConfigLoad)

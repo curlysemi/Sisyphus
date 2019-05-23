@@ -15,11 +15,7 @@ namespace Sisyphus.Commands.Base
         [Option('i', "input", HelpText = "Input project file of solution file path.")]
         public string ProjectFileOrSolutionFilePath { get; set; } = Environment.CurrentDirectory;
 
-        protected virtual (bool isSuccess, SError error) BeforeAll(Config config, string repoPath, ref List<string> absoluteProjectFilePaths)
-        {
-            Log("------ sisyphus started ------");
-            return Success;
-        }
+        protected virtual (bool isSuccess, SError error) BeforeAll(Config config, string repoPath, ref List<string> absoluteProjectFilePaths) => Success;
 
         protected abstract (bool isSuccess, SError error) HandleProject(Config config, string repoPath, string projectPath);
 
