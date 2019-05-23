@@ -221,15 +221,18 @@ namespace Sisyphus.Commands
 
             var projectDir = FileHelper.GetParentDirectory(projectPath);
             var packageJsonFilePath = Path.Join(projectDir, "packages.config");
-            XDocument document = XDocument.Load(packageJsonFilePath, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
-
-            var packageElements = document.Root.Elements("package");
-            if (packageElements?.Any() == true)
+            if (File.Exists(packageJsonFilePath))
             {
-                foreach (var package in packageElements)
+                XDocument document = XDocument.Load(packageJsonFilePath, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
+
+                var packageElements = document.Root.Elements("package");
+                if (packageElements?.Any() == true)
                 {
-                    var depConfig = new DepConfig(package);
-                    packages.Add(depConfig);
+                    foreach (var package in packageElements)
+                    {
+                        var depConfig = new DepConfig(package);
+                        packages.Add(depConfig);
+                    }
                 }
             }
 
