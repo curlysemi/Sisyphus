@@ -21,6 +21,7 @@ namespace Sisyphus.Commands.Base
 
         protected override (bool isSuccess, SError error) PreRunSetup(ref Config config)
         {
+            Vlog($"'{nameof(ProjectFileOrSolutionFilePath)}' is '{ProjectFileOrSolutionFilePath}'");
             var fileType = FileHelper.GetFileType(ProjectFileOrSolutionFilePath);
             switch (fileType)
             {

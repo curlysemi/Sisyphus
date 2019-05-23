@@ -87,6 +87,7 @@ namespace Sisyphus.Core
                     {
                         config = JsonConvert.DeserializeObject<Config>(configSrc);
                         config.ConfigPath = filePath;
+                        Log($"Found config at '{filePath}'");
                     }
                     catch (Exception ex)
                     {
