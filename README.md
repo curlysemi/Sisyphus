@@ -175,3 +175,6 @@ Using `sisyphus` this should be a relatively easy process. This example assumes 
 
     ```
     ("HP" refers to the actual hint path and "GP" refers to the 'guessed hint path' using the packages.config file.)
+
+## Non-Normative Notes
+For whatever reason, there is a slight issue with framework-dependent publishes and LibGit2Sharp. In addition to the git2`-572e4d8.dll`, the published output contains a `git2-572e4d8.pdb` file that is actually unnecessary and that the .NET Core Runtime could trip over when trying to find. In addition to publishing, this `.pdb` file is deleted and removed from the `sisyphus.deps.json` file.
