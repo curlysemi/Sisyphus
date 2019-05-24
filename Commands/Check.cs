@@ -19,6 +19,9 @@ namespace Sisyphus.Commands
         [Option('e', "errors", HelpText = "Consider any issues to be errors (non-zero return).")]
         public bool IsErrorMode { get; set; }
 
+        [Option('d', "duplicates", HelpText = "Also check for duplicate includes irrespective of element type.")]
+        public bool ShouldCheckForDuplicates { get; set; }
+
         private bool _errorOccurred { get; set; }
 
         protected override (bool isSuccess, SError error) HandleProject(Config config, string repoPath, string projectPath)
@@ -26,8 +29,9 @@ namespace Sisyphus.Commands
             // TODO: setting to warn of duplicates when treating git files in a case-insensitive manner . . .
             // Because `thing.txt` and `Thing.txt` could theoretically both exist . . .
 
-            var filesTrackedByGit = GitHelper.GetFilesFromGitForProject(repoPath, projectPath);
-            var filesIncludedInProjectFile = ProjectFileHelper.GetFilesFromProjectFile(projectPath, out string projectFileParentDirectoryName);
+            HashSet<string> filesTrackedByGit = GitHelper.GetFilesFromGitForProject(repoPath, projectPath);
+            HashSet<string> filesIncludedInProjectFile = ProjectFileHelper.GetFilesFromProjectFile(projectPath, out HashSet<string> duplicates);
+            string projectName = ProjectFileHelper.GetProjectFileName(projectPath);
 
             // Filter out project files, because project files do not include themselves . . .
             var self = FileHelper.NormalizePath(Path.GetRelativePath(repoPath, projectPath));
@@ -44,18 +48,31 @@ namespace Sisyphus.Commands
             {
                 _errorOccurred = true;
 
-                Log(projectFileParentDirectoryName + ":");
+                Log($"{projectName}:");
                 foreach (var file in filesNotIncludedInProjectFile)
                 {
-                    LogError($" ({Ordinal}) \t{file}");
+                    LogError($" ({Ordinal}) \t{file}", includePrefix: false) ;
                     Ordinal++;
                 }
                 NL();
             }
             else
             {
-                Log($"'{projectFileParentDirectoryName}' is not missing any files.");
+                Log($"'{projectName}' is not missing any files.");
                 NL();
+            }
+
+            if (ShouldCheckForDuplicates)
+            {
+                if (duplicates?.Any() == true)
+                {
+                    Log($"{projectName}:");
+                    foreach (var duplicate in duplicates)
+                    {
+                        LogError($" ({Ordinal}) \t DUPLICATE {duplicate}", includePrefix: false);
+                        Ordinal++;
+                    }
+                }
             }
 
             return Success;

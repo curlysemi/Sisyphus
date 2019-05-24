@@ -24,9 +24,13 @@ namespace Sisyphus.Commands
         [Option('d', "on-disk", HelpText = "When checking HintPath discrepancies, check that the packages are on disk.")]
         public bool ShouldCheckPackagesOnDisk { get; set; }
 
+        [Option('m', "missing", HelpText = "Check for dependencies listed in packages.config that are missing from the project file.")]
+        public bool ShouldLookForPackagesMissingFromProjectFile { get; set; }
+
         [Option('e', "errors", HelpText = "Consider any issues to be errors (non-zero return).")]
         public bool IsErrorMode { get; set; }
 
+        private int NumMissing { get; set; } = 0;
         private int NumDiscrepancies { get; set; } = 0;
         private int NumNoHPs { get; set; } = 0;
         private int NumFine { get; set; } = 0;
@@ -83,10 +87,26 @@ namespace Sisyphus.Commands
 
         protected override (bool isSuccess, SError error) HandleProject(Config config, string repoPath, string projectPath)
         {
-            var projName = ProjectFileHelper.GetProjectFileParentDirName(projectPath, out string absoluteProjectFileParentDirPath);
+            ProjectFileHelper.GetProjectFileParentDirName(projectPath, out string absoluteProjectFileParentDirPath);
+            var projName = ProjectFileHelper.GetProjectFileName(projectPath);
 
             var packageRefs = GetPackageReferencesFromProjectFile(projectPath);
             var packagesConf = GetPackagesFromPackagesDotConfig(projectPath);
+
+            if (ShouldLookForPackagesMissingFromProjectFile)
+            {
+                var missingPackages = packagesConf.Where(p => !packageRefs.Any(r => r.Name == p.Name));
+                if (missingPackages?.Any() == true)
+                {
+                    Log($"'{projName}' project file missing references:");
+                    foreach (var missingPackage in missingPackages)
+                    {
+                        Log($"\t{missingPackage.Name}.{missingPackage.Version}");
+                        NumMissing++;
+                    }
+                    NL();
+                }
+            }
 
             var primaryDependencies = packageRefs.Where(p => packagesConf.Any(c => c.Name == p.Name));
 
@@ -152,11 +172,25 @@ namespace Sisyphus.Commands
         {
             var l = new LogBuilder(IsVerbose);
 
-            bool anErrorOccurred = IsErrorMode && (NumDiscrepancies > 0 || NumNoHPs > 0 || MissingPackages.Any());
+            bool anErrorOccurred = IsErrorMode && (NumMissing > 0 || NumDiscrepancies > 0 || NumNoHPs > 0 || MissingPackages.Any());
 
-            l.Log($"Number of discrepancies:  {NumDiscrepancies}");
-            l.Log($"Number of no HintPaths:   {NumNoHPs}");
-            l.Log($"Number of fine HintPaths: {NumFine}");
+            if (anErrorOccurred)
+            {
+                l.Log("There were project file dependency issues.");
+                l.NL();
+            }
+
+            if (ShouldLookForPackagesMissingFromProjectFile)
+            {
+                l.Log($"Number of missing packages: {NumMissing}");
+            }
+
+            if (ShouldPrintPotentialHintPathDiscrepancies)
+            {
+                l.Log($"Number of discrepancies:    {NumDiscrepancies}");
+                l.Log($"Number of no HintPaths:     {NumNoHPs}");
+                l.Log($"Number of fine HintPaths:   {NumFine}");
+            }
 
             if (MissingPackages.Any())
             {

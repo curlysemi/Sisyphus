@@ -28,11 +28,18 @@ namespace Sisyphus.Helpers
             }
         }
 
-        public static void LogError(SError error)
+        public static void LogError(SError error, bool includePrefix = true)
         {
             var colorBefore = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Red;
-            Log($"ERROR: {error}");
+            if (includePrefix)
+            {
+                Log($"ERROR: {error}");
+            }
+            else
+            {
+                Log(error);
+            }
             Console.ForegroundColor = colorBefore;
         }
 

@@ -23,5 +23,10 @@
         {
             return new SError(message);
         }
+
+        public override string ToString()
+        {
+            return _message;
+        }
     }
 }

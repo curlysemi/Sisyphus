@@ -22,17 +22,23 @@ namespace Sisyphus.Helpers
             return (document, itemGroups);
         }
 
+        public static string GetProjectFileName(string projectPath)
+        {
+            return FileHelper.GetName(projectPath);
+        }
+
         public static string GetProjectFileParentDirName(string projectPath, out string absoluteProjectFileParentDirPath)
         {
             absoluteProjectFileParentDirPath = FileHelper.GetParentDirectory(projectPath);
             return FileHelper.GetName(absoluteProjectFileParentDirPath);
         }
 
-        public static HashSet<string> GetFilesFromProjectFile(string projectPath, out string projectFileParentDirectoryName)
+        public static HashSet<string> GetFilesFromProjectFile(string projectPath, out HashSet<string> duplicates)
         {
-            projectFileParentDirectoryName = GetProjectFileParentDirName(projectPath, out _);
+            string projectFileParentDirectoryName = GetProjectFileParentDirName(projectPath, out _);
 
             var files = new HashSet<string>();
+            duplicates = new HashSet<string>();
 
             var (document, itemGroups) = LoadProjectXml(projectPath);
 
@@ -53,7 +59,10 @@ namespace Sisyphus.Helpers
 
                             var unescapedFile = Uri.UnescapeDataString(file);
 
-                            files.Add(unescapedFile);
+                            if (!files.Add(unescapedFile))
+                            {
+                                duplicates.Add(unescapedFile);
+                            }
                         }
                     }
                 }

@@ -15,8 +15,7 @@ These problems are such that they are encountered during runtime, which isn't al
 ```
   check      Check the provided solution or project file for missing includes.
 
-  dedup      Remove duplicate file-references from project file or projects in solution file. Sorting first is
-             recommended.
+  dedup      Remove duplicate file-references from project file or projects in solution file. Sorting first is recommended.
 
   sort       Sort the contents of the provided project file or projects in provided solution file.
 
@@ -35,21 +34,22 @@ Using the `help` command, the options for a particular command can be shown:
 $ sisyphus help check
 ```
 ```
-sisyphus 0.0.1
+sisyphus 0.0.2
 Copyright (C) 2019 Web Team
 
-  -e, --errors     Consider any issues to be errors (non-zero return).
+  -e, --errors        Consider any issues to be errors (non-zero return).
 
-  -i, --input      Input project file of solution file path.
+  -d, --duplicates    Also check for duplicate includes irrespective of element type.
 
-  -v, --verbose    Run with verbose logging.
+  -i, --input         Input project file of solution file path.
 
-  -c, --config     Set the path for the 'Sisyphus.js' configuration file (commands that take an input path argument will
-                   check for a nearby config file by default).
+  -v, --verbose       Run with verbose logging.
 
-  --help           Display this help screen.
+  -c, --config        Set the path for the 'Sisyphus.js' configuration file (commands that take an input path argument will check for a nearby config file by default).
 
-  --version        Display version information.
+  --help              Display this help screen.
+
+  --version           Display version information.
 ```
 
 ## Setup
@@ -79,7 +79,7 @@ Saving new config!
   "IgnorableFiles": [
     "**.gitignore",
     "**.tfignore",
-    "**.exclude"
+    "***.exclude"
   ],
   "RelativePackagesPath": "..\\packages\\"
 }
@@ -106,24 +106,24 @@ Using `sisyphus` this should be a relatively easy process. This example assumes 
     ```
     If there are any errors, you will see output similar to the following:
     ```
-    'AProject' is not missing any files. :)
+    'AProject.csproj' is not missing any files. :)
 
-    BProject:
+    BProject.csproj:
     (1)    BProject/Controllers/SomeController.cs
     (2)    BProject/Models/Some/SomeModel.cs
 
-    CProject:
+    CProject.csproj:
     (3)    CProject/Views/Home/Default.cshtml
 
     File(s) were missing from project(s).
     ```
     If there were _no_ errors, you would see something similar to the following:
     ```
-    'AProject' is not missing any files. :)
+    'AProject.csproj' is not missing any files. :)
 
-    'BProject' is not missing any files. :)
+    'BProject.csproj' is not missing any files. :)
 
-    'CProject' is not missing any files. :)
+    'CProject.csproj' is not missing any files. :)
 
     ```
 
@@ -132,7 +132,7 @@ Using `sisyphus` this should be a relatively easy process. This example assumes 
     $ sisyphus help verdep
     ```
     ```
-    sisyphus 0.0.1
+    sisyphus 0.0.2
     Copyright (C) 2019 Web Team
 
       -p, --hint-paths          Check for potential HintPath discrepancies.
@@ -141,14 +141,15 @@ Using `sisyphus` this should be a relatively easy process. This example assumes 
 
       -d, --on-disk             When checking HintPath discrepancies, check that the packages are on disk.
 
+      -m, --missing             Check for dependencies listed in packages.config that are missing from the project file.
+
       -e, --errors              Consider any issues to be errors (non-zero return).
 
       -i, --input               Input project file of solution file path.
 
       -v, --verbose             Run with verbose logging.
 
-      -c, --config              Set the path for the 'Sisyphus.js' configuration file (commands that take an input path
-                                argument will check for a nearby config file by default).
+      -c, --config              Set the path for the 'Sisyphus.js' configuration file (commands that take an input path argument will check for a nearby config file by default).
 
       --help                    Display this help screen.
 
@@ -160,13 +161,13 @@ Using `sisyphus` this should be a relatively easy process. This example assumes 
     ```
     You may see output like the following:
     ```
-    AProject's 'CustomPackage':
+    AProject.csproj's 'CustomPackage':
     HP:     ..\packages\CustomLibrary.1.0.156\lib\net461\CustomPackage.dll
     GP:     ..\packages\CustomModel.1.0.0\lib\net462\CustomPackage.dll
 
-    BProject's 'Microsoft.CSharp' has no hint path
+    BProject.csproj's 'Microsoft.CSharp' has no hint path
 
-    CProject's 'System.Net.Http' has no hint path
+    CProject.csproj's 'System.Net.Http' has no hint path
 
     Number of discrepancies:  1
     Number of no HintPaths:   2
