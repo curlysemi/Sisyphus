@@ -4,8 +4,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <AssemblyName>sisyphus</AssemblyName>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-    <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
+    <TargetFramework>net461</TargetFramework>
     <OutputType>Exe</OutputType>
     <Authors>curlysemi</Authors>
     <Company>Web Team</Company>

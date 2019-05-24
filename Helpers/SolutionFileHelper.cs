@@ -49,7 +49,7 @@ namespace Sisyphus.Helpers
             {
                 // These paths are relative to the solution file, which isn't necessarily in the same directory as our git repo . . .
                 // So let's just make the paths absolute.
-                paths.AddRange(solution.Projects.OrderBy(p => p.Name).Select(s => Path.Join(parentDir, s.Path)));
+                paths.AddRange(solution.Projects.OrderBy(p => p.Name).Select(s => FileHelper.Join(parentDir, s.Path)));
             }
 
             return paths;

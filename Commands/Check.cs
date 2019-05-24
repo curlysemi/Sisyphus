@@ -34,7 +34,7 @@ namespace Sisyphus.Commands
             string projectName = ProjectFileHelper.GetProjectFileName(projectPath);
 
             // Filter out project files, because project files do not include themselves . . .
-            var self = FileHelper.NormalizePath(Path.GetRelativePath(repoPath, projectPath));
+            var self = FileHelper.NormalizePath(FileHelper.GetRelativePath(repoPath, projectPath));
             filesTrackedByGit.Remove(self);
 
             // Remove any other files our config says we can ignore before we compare . . .

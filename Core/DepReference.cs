@@ -40,7 +40,7 @@ namespace Sisyphus.Core
         {
             OriginalString = packageIncludeString;
 
-            var subAttributes = packageIncludeString.Split(", ").ToList();
+            var subAttributes = packageIncludeString.Split(new string[] { ", " }, options: StringSplitOptions.None).ToList();
             if (subAttributes?.Any() == true)
             {
                 Name = subAttributes.FirstOrDefault();
@@ -49,7 +49,7 @@ namespace Sisyphus.Core
 
             foreach (var remainingSubAttr in subAttributes)
             {
-                var stuff = remainingSubAttr.Split("=");
+                var stuff = remainingSubAttr.Split('=');
                 if (stuff.Count() == 2)
                 {
                     _subAttributes[stuff[0]] = stuff[1];

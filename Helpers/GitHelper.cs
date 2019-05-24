@@ -107,7 +107,7 @@ namespace Sisyphus.Helpers
         {
             var absoluteProjectFileParentDirPath = FileHelper.GetParentDirectory(projectPath);
             var projectFileParentDirectoryName = FileHelper.GetName(absoluteProjectFileParentDirPath);
-            var relativeProjectFileParentDir = Path.GetRelativePath(repoPath, absoluteProjectFileParentDirPath);
+            var relativeProjectFileParentDir = FileHelper.GetRelativePath(repoPath, absoluteProjectFileParentDirPath);
 
             var files = new HashSet<string>();
 

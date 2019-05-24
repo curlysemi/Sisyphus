@@ -61,7 +61,7 @@ namespace Sisyphus.Core
         {
             if (!configPath.EndsWith(Constants.SISYPHUS_CONFIG_FILENAME))
             {
-                return Path.Join(configPath, Constants.SISYPHUS_CONFIG_FILENAME);
+                return FileHelper.Join(configPath, Constants.SISYPHUS_CONFIG_FILENAME);
             }
             else
             {
@@ -77,7 +77,7 @@ namespace Sisyphus.Core
                 var filePath = configPath;
                 if (!configPath.EndsWith(Constants.SISYPHUS_CONFIG_FILENAME))
                 {
-                    filePath = Path.Join(configPath, Constants.SISYPHUS_CONFIG_FILENAME);
+                    filePath = FileHelper.Join(configPath, Constants.SISYPHUS_CONFIG_FILENAME);
                 }
                 if (File.Exists(filePath))
                 {

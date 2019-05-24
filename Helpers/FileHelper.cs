@@ -8,6 +8,28 @@ namespace Sisyphus.Helpers
 {
     public static class FileHelper
     {
+        // https://stackoverflow.com/a/340454
+        public static string GetRelativePath(string fromPath, string toPath)
+        {
+            if (string.IsNullOrEmpty(fromPath)) throw new ArgumentNullException("fromPath");
+            if (string.IsNullOrEmpty(toPath)) throw new ArgumentNullException("toPath");
+
+            Uri fromUri = new Uri(fromPath);
+            Uri toUri = new Uri(toPath);
+
+            if (fromUri.Scheme != toUri.Scheme) { return toPath; } // path can't be made relative.
+
+            Uri relativeUri = fromUri.MakeRelativeUri(toUri);
+            string relativePath = Uri.UnescapeDataString(relativeUri.ToString());
+
+            if (toUri.Scheme.Equals("file", StringComparison.InvariantCultureIgnoreCase))
+            {
+                relativePath = relativePath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+            }
+
+            return relativePath;
+        }
+
         public static string GetParentDirectory(string path)
         {
             var parentDirectory = Path.GetDirectoryName(path);
@@ -64,11 +86,23 @@ namespace Sisyphus.Helpers
             {
                 foreach (var p in paths.Skip(1))
                 {
-                    path = Path.Join(path, p);
+                    path = JoinInner(path, p);
                 }
             }
 
             return path;
+        }
+
+        private static string JoinInner(string path, string pathB)
+        {
+            var result = path;
+            if (!result.EndsWith(Path.DirectorySeparatorChar.ToString()))
+            {
+                result += Path.DirectorySeparatorChar;
+            }
+            result += pathB;
+
+            return result;
         }
     }
 }

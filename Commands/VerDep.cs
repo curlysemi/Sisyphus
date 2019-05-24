@@ -122,7 +122,7 @@ namespace Sisyphus.Commands
                     if (hasHintPath && ShouldCheckPackagesOnDisk)
                     {
                         // HintPaths are relative, so we need to make the path absolute . . .
-                        string absoluteHintPath = Path.GetFullPath(hintPath, absoluteProjectFileParentDirPath);
+                        string absoluteHintPath = Path.GetFullPath(hintPath);
                         if (!File.Exists(absoluteHintPath))
                         {
                             AddMissingPackageOccurrence(absoluteHintPath, projName);
@@ -254,7 +254,7 @@ namespace Sisyphus.Commands
             var packages = new List<DepConfig>();
 
             var projectDir = FileHelper.GetParentDirectory(projectPath);
-            var packageJsonFilePath = Path.Join(projectDir, "packages.config");
+            var packageJsonFilePath = FileHelper.Join(projectDir, "packages.config");
             if (File.Exists(packageJsonFilePath))
             {
                 XDocument document = XDocument.Load(packageJsonFilePath, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
