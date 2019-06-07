@@ -13,15 +13,21 @@ namespace Sisyphus.Commands
     [Verb("sort", HelpText = "Sort the contents of the provided project file or projects in provided solution file.")]
     internal class Sort : PortedProjectFileOrSolutionFileCommand
     {
+        [Option('s', "--skip-sorting", HelpText = "Too lazy to refactor the code, this option allows compatible item groups to be combined without actually performing all the additional sorting (useful for minimizing git conflicts)")]
+        public bool SkipSorting { get; set; }
+
         protected override bool ActOnProject(Config config, ref XElement[] itemGroups)
         {
             var processedItemGroups = new List<XElement>();
 
             CombineCompatibleItemGroups(itemGroups, processedItemGroups);
 
-            foreach (XElement itemGroup in processedItemGroups)
+            if (!SkipSorting)
             {
-                SortItemGroup(itemGroup);
+                foreach (XElement itemGroup in processedItemGroups)
+                {
+                    SortItemGroup(itemGroup);
+                }
             }
 
             return true;
