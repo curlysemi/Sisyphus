@@ -11,9 +11,17 @@ namespace Sisyphus.Helpers
     {
         public static string GetRepoPathFromPath(string path)
         {
+            IOExtensions.Vt(Program.IsVerbose, new { path });
             if (File.Exists(path))
             {
-                return GetRepoPathFromFilePath(path);
+                if (!path.StartsWith(".\\") && $".\\{path}" is string fixedPath)
+                {
+                    return GetRepoPathFromFilePath(fixedPath);
+                }
+                else
+                {
+                    return GetRepoPathFromFilePath(path);
+                }
             }
             else if (Directory.Exists(path))
             {

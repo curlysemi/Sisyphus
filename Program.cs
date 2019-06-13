@@ -6,6 +6,8 @@ namespace Sisyphus
 {
     class Program
     {
+        public static bool IsVerbose { get; set; }
+
         public static int Main(string[] args)
         {
             // If no arguments were provided, let's default to the 'help' command

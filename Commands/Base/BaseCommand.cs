@@ -1,7 +1,7 @@
 ﻿using CommandLine;
 using Sisyphus.Core;
 using System;
-
+using System.Runtime.CompilerServices;
 using static Sisyphus.Helpers.IOExtensions;
 
 namespace Sisyphus.Commands.Base
@@ -21,6 +21,10 @@ namespace Sisyphus.Commands.Base
 
         protected void LogEx(Exception ex) => Helpers.IOExtensions.LogEx(ex, IsVerbose);
 
+        protected void Vt([CallerMemberName] string caller = null) => Helpers.IOExtensions.Vt(IsVerbose, caller);
+
+        protected void Vt(dynamic @params, [CallerMemberName] string caller = null) => Helpers.IOExtensions.Vt(IsVerbose, @params, caller);
+
         protected virtual (bool isSuccess, SError error) PreRunSetup(ref Config config) => Success;
 
         protected virtual bool ShouldTryDefaultConfigLoad { get; set; } = true;
@@ -29,6 +33,8 @@ namespace Sisyphus.Commands.Base
         {
             try
             {
+                Program.IsVerbose = IsVerbose;
+
                 Log("------ sisyphus started ------");
                 Vlog("Verbose logging enabled!");
                 Vlog("\n");
